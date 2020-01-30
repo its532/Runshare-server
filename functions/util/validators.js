@@ -17,11 +17,14 @@ exports.validateSignupData = data => {
   } else if (!isEmail(data.email)) {
     errors.email = "Must be a vaild email address";
   }
+  if (isEmpty(data.gender)) errors.gender = "性別を入力してください";
 
   if (isEmpty(data.password)) errors.password = "Must not be empty";
   if (data.password !== data.confirmPassword)
     errors.confirmPassword = "Passwords must match";
   if (isEmpty(data.handle)) errors.handle = "Must not be empty";
+
+  if (isEmpty(data.mileage)) errors.mileage = "走行距離";
 
   return {
     errors,

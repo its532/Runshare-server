@@ -4,8 +4,12 @@ const FBAuth = require("./util/fbAuth");
 
 const {
   getAllScreams,
-  postOneScream,
-  getScream
+  postScream,
+  getScream,
+  commentScream,
+  likeScream,
+  unlikeScream,
+  deleteScream
 } = require("./handlers/screams");
 const {
   signup,
@@ -24,9 +28,14 @@ const {
 // const firebase = require("firebase");
 // firebase.initializeApp(firebaseConfig);
 
+app.delete("/scream/:screamId", FBAuth, deleteScream);
+
 app.get("/screams", getAllScreams);
-app.post("/scream", FBAuth, postOneScream);
+app.post("/scream", FBAuth, postScream);
 app.get("/scream/:screamId", getScream);
+app.get("/scream/:screamId/like", FBAuth, likeScream);
+app.get("/scream/:screamId/unlike", FBAuth, unlikeScream);
+app.post("/scream/:screamId/comment", FBAuth, commentScream);
 
 app.post("/signup", signup);
 app.post("/login", login);
