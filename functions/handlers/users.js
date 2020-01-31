@@ -14,16 +14,18 @@ const {
 exports.signup = (req, res) => {
   const newUser = {
     email: req.body.email,
+    gender: req.body.gender,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
-    handle: req.body.handle
+    handle: req.body.handle,
+    mileage: req.body.mileage
   };
 
   const { valid, errors } = validateSignupData(newUser);
 
   if (!valid) return res.status(400).json(errors);
 
-  const noImg = "no-img.png";
+  const no = "no.png";
 
   let token, userId;
   db.doc(`/users/${newUser.handle}`)
@@ -47,8 +49,10 @@ exports.signup = (req, res) => {
       const userCredentials = {
         handle: newUser.handle,
         email: newUser.email,
+        gender: newUser.gender,
+        mileage: newUser.mileage,
         createdAt: new Date().toISOString(),
-        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${no}?alt=media`,
         userId
       };
       return db.doc(`/users/${newUser.handle}`).set(userCredentials);
@@ -61,7 +65,7 @@ exports.signup = (req, res) => {
       if (err.code === "auth/email-already-in-use") {
         return res.status(400).json({ email: "Email is already is use" });
       } else {
-        return res.status(500).json({ error: err.code });
+        return res.status(500).json({ general: "入力に誤りがあります" });
       }
     });
 };
@@ -87,11 +91,8 @@ exports.login = (req, res) => {
     })
     .catch(err => {
       console.error(err);
-      if (err.code === "auth/wrong-password") {
-        return res.status(403).json({ general: "Wrong credential" });
-      } else {
-        return res.status(500).json({ error: err.code });
-      }
+
+      return res.status(403).json({ general: "Wrong credential" });
     });
 };
 
@@ -102,6 +103,43 @@ exports.addUserDetails = (req, res) => {
     .update(userDetails)
     .then(() => {
       return res.json({ message: "Details added successfully" });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
+
+exports.getUserDetail = (req, res) => {
+  let userData = {};
+  db.doc(`/users/${req.params.handle}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.user = doc.data();
+        return db
+          .collection("screams")
+          .where("userHandle", "==", req.params.handle)
+          .orderBy("createdAt", "desc")
+          .get();
+      } else {
+        return res.status(404).json({ errror: "User not found" });
+      }
+    })
+    .then(data => {
+      userData.screams = [];
+      data.forEach(doc => {
+        userData.screams.push({
+          body: doc.data().body,
+          createdAt: doc.data().createdAt,
+          userHandle: doc.data().userHandle,
+          userImage: doc.data().userImage,
+          likeCount: doc.data().likeCount,
+          commentCount: doc.data().commentCount,
+          screamId: doc.id
+        });
+      });
+      return res.json(userData);
     })
     .catch(err => {
       console.error(err);
@@ -126,6 +164,27 @@ exports.getAuthenticatedUser = (req, res) => {
       userData.likes = [];
       data.forEach(doc => {
         userData.likes.push(doc.data());
+      });
+      return db
+        .collection("notifications")
+        .where("recipient", "==", req.user.handle)
+        .orderBy("createdAt", "desc")
+        .limit(10)
+        .get();
+    })
+    .then(data => {
+      console.log(data);
+      userData.notifications = [];
+      data.forEach(doc => {
+        userData.notifications.push({
+          recipient: doc.data().recipient,
+          sender: doc.data().sender,
+          createdAt: doc.data().createdAt,
+          screamId: doc.data().screamId,
+          type: doc.data().type,
+          read: doc.data().read,
+          notificationId: doc.id
+        });
       });
       return res.json(userData);
     })
@@ -193,4 +252,54 @@ exports.uploadImage = (req, res) => {
       });
   });
   busboy.end(req.rawBody);
+};
+
+exports.commentOnScream = (req, res) => {
+  if (req.body.body.trim() === "")
+    return res.status(400).json({ comment: "Must not be empty" });
+
+  const newComment = {
+    body: req.body.body,
+    createdAt: new Date().toISOString(),
+    screamId: req.params.screamId,
+    userHandle: req.user.handle,
+    userImage: req.user.imageUrl
+  };
+  console.log(newComment);
+
+  db.doc(`/screams/${req.params.screamId}`)
+    .get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: "Scream not found" });
+      }
+      return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
+    })
+    .then(() => {
+      return db.collection("comments").add(newComment);
+    })
+    .then(() => {
+      res.json(newComment);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: "Something went wrong" });
+    });
+};
+
+exports.markNotificationsRead = (req, res) => {
+  let batch = db.batch();
+  req.body.forEach(notificationId => {
+    const notification = db.doc(`/notifications/${notificationId}`);
+    batch.update(notification, { read: true });
+  });
+  batch
+    .commit()
+    .then(() => {
+      return res.json({ message: "Notifications marked read" });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
 };
