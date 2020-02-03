@@ -13,18 +13,18 @@ exports.validateSignupData = data => {
   let errors = {};
 
   if (isEmpty(data.email)) {
-    errors.email = "Email must not be empty";
+    errors.email = "メールアドレスを入力してください";
   } else if (!isEmail(data.email)) {
-    errors.email = "Must be a vaild email address";
+    errors.email = "このメールアドレスは使用できません";
   }
   if (isEmpty(data.gender)) errors.gender = "性別を入力してください";
 
-  if (isEmpty(data.password)) errors.password = "Must not be empty";
+  if (isEmpty(data.password)) errors.password = "パスワードを入力してください";
   if (data.password !== data.confirmPassword)
-    errors.confirmPassword = "Passwords must match";
-  if (isEmpty(data.handle)) errors.handle = "Must not be empty";
+    errors.confirmPassword = "パスワードが一致しません";
+  if (isEmpty(data.handle)) errors.handle = "ユーザー名を入力してください";
 
-  if (isEmpty(data.mileage)) errors.mileage = "走行距離";
+  if (isEmpty(data.mileage)) errors.mileage = "年齢を入力してくだい";
 
   return {
     errors,
@@ -35,9 +35,9 @@ exports.validateSignupData = data => {
 exports.validateLoginData = data => {
   let errors = {};
 
-  if (isEmpty(data.email)) errors.email = "Email must not be empty";
+  if (isEmpty(data.email)) errors.email = "メールアドレスを入力してくださいy";
 
-  if (isEmpty(data.password)) errors.password = "Must not be empty";
+  if (isEmpty(data.password)) errors.password = "パスワードを入力してくださ";
 
   return {
     errors,
