@@ -63,7 +63,7 @@ exports.signup = (req, res) => {
     .catch(err => {
       console.error(err);
       if (err.code === "auth/email-already-in-use") {
-        return res.status(400).json({ email: "Email is already is use" });
+        return res.status(400).json({ email: "already is use" });
       } else {
         return res.status(500).json({ general: "入力に誤りがあります" });
       }
@@ -92,7 +92,7 @@ exports.login = (req, res) => {
     .catch(err => {
       console.error(err);
 
-      return res.status(403).json({ general: "Wrong credential" });
+      return res.status(403).json({ general: "Wrong" });
     });
 };
 
@@ -296,7 +296,7 @@ exports.markNotificationsRead = (req, res) => {
   batch
     .commit()
     .then(() => {
-      return res.json({ message: "Notifications marked read" });
+      return res.json({ message: "Notifications" });
     })
     .catch(err => {
       console.error(err);
