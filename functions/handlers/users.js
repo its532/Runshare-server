@@ -17,8 +17,8 @@ exports.signup = (req, res) => {
     gender: req.body.gender,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
-    handle: req.body.handle,
-    mileage: req.body.mileage
+    handle: req.body.handle
+    // mileage: req.body.mileage
   };
 
   const { valid, errors } = validateSignupData(newUser);
@@ -50,7 +50,7 @@ exports.signup = (req, res) => {
         handle: newUser.handle,
         email: newUser.email,
         gender: newUser.gender,
-        mileage: newUser.mileage,
+        // mileage: newUser.mileage,
         createdAt: new Date().toISOString(),
         imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${no}?alt=media`,
         userId
@@ -63,9 +63,9 @@ exports.signup = (req, res) => {
     .catch(err => {
       console.error(err);
       if (err.code === "auth/email-already-in-use") {
-        return res.status(400).json({ email: "already is use" });
+        return res.status(400).json({ email: "すでに使われています" });
       } else {
-        return res.status(500).json({ general: "入力に誤りがあります" });
+        return res.status(500).json({ general: "error" });
       }
     });
 };
@@ -115,6 +115,7 @@ exports.getUserDetail = (req, res) => {
   db.doc(`/users/${req.params.handle}`)
     .get()
     .then(doc => {
+      console.log(doc);
       if (doc.exists) {
         userData.user = doc.data();
         return db
@@ -303,3 +304,5 @@ exports.markNotificationsRead = (req, res) => {
       return res.status(500).json({ error: err.code });
     });
 };
+
+//
