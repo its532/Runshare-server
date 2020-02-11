@@ -12,10 +12,12 @@ const {
   getAllScreams,
   postScream,
   getScream,
+  screamUploadImage,
   commentScream,
   likeScream,
   unlikeScream,
-  deleteScream
+  deleteScream,
+  searchScream
 } = require("./handlers/screams");
 const {
   signup,
@@ -41,9 +43,11 @@ app.delete("/scream/:screamId", FBAuth, deleteScream);
 app.get("/screams", getAllScreams);
 app.post("/scream", FBAuth, postScream);
 app.get("/scream/:screamId", getScream);
+app.post("/scream/:screamId/image", screamUploadImage);
 app.get("/scream/:screamId/like", FBAuth, likeScream);
 app.get("/scream/:screamId/unlike", FBAuth, unlikeScream);
 app.post("/scream/:screamId/comment", FBAuth, commentScream);
+app.post("/scream/search", FBAuth, searchScream);
 
 app.post("/signup", signup);
 app.post("/login", login);

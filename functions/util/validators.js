@@ -24,7 +24,7 @@ exports.validateSignupData = data => {
     errors.confirmPassword = "パスワードが一致しません";
   if (isEmpty(data.handle)) errors.handle = "ユーザー名を入力してください";
 
-  if (isEmpty(data.mileage)) errors.mileage = "年齢を入力してくだい";
+  // if (isEmpty(data.mileage)) errors.mileage = "年齢を入力してくだい";
 
   return {
     errors,
