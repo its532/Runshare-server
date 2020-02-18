@@ -1,3 +1,3 @@
 # Runshare-server
 
-Runshareのサーバー側
+Runshareのバックエンド
